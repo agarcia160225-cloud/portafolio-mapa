@@ -3,215 +3,323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azacord Investing - Portafolio Inmobiliario</title>
-    
-    <!-- Tailwind CSS para un diseño moderno y responsivo -->
+    <title>Better Solution USA - North Port Real Estate</title>
+    <!-- Tailwind CSS para diseño moderno y responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Leaflet CSS: Librería para el mapa interactivo -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
+    <!-- GLightbox CSS para el efecto de zoom -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
     <style>
-        /* Estilos personalizados para el mapa y las tarjetas */
-        #map { height: 100%; width: 100%; }
-        .leaflet-container { font-family: ui-sans-serif, system-ui, sans-serif; }
-        .custom-popup .leaflet-popup-content-wrapper {
-            border-radius: 12px;
-            padding: 8px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        /* Suavizado de transiciones */
+        .property-card img {
+            transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
-        .property-card {
-            transition: all 0.2s ease-in-out;
+        .property-card:hover img {
+            transform: scale(1.08);
         }
-        .property-card:hover {
-            transform: translateX(4px);
-            border-color: #3b82f6;
+        /* Ajuste para que el lightbox se vea bien en móviles */
+        .glightbox-container {
+            --glightbox-bg: rgba(0, 0, 0, 0.95);
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 flex flex-col h-screen overflow-hidden">
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
 
-    <!-- Encabezado / Logo -->
-    <nav class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0 z-10">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-200">A</div>
-            <div>
-                <h1 class="font-bold text-lg leading-tight">Azacord Investing LLC</h1>
-                <p class="text-xs text-slate-500 font-medium">Inversiones Inmobiliarias • North Port, FL</p>
+    <!-- Header Responsivo -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 md:py-4 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+            <div class="flex items-center space-x-2">
+                <div class="bg-blue-900 text-white p-2 rounded-lg font-bold text-xl leading-none">BS</div>
+                <div class="text-xl md:text-2xl font-black text-blue-950 tracking-tight">
+                    Better Solution USA
+                </div>
             </div>
+            <nav class="flex items-center space-x-4 md:space-x-8 text-xs md:text-sm font-bold uppercase tracking-wider">
+                <a href="#" class="text-blue-700 border-b-2 border-blue-700 pb-1">Terrenos</a>
+                <a href="#" class="text-slate-500 hover:text-blue-700 transition">Proyectos</a>
+                <a href="#" class="text-slate-500 hover:text-blue-700 transition">Contacto</a>
+            </nav>
         </div>
-        <div class="hidden md:flex items-center gap-6">
-            <div class="text-right">
-                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Activos Totales</p>
-                <p class="text-sm font-bold text-slate-700">4 Propiedades</p>
-            </div>
-            <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-full transition-colors shadow-sm">
-                Contactar
-            </button>
+    </header>
+
+    <!-- Hero Section Adaptable -->
+    <section class="relative bg-blue-950 text-white overflow-hidden">
+        <!-- Decoración de fondo -->
+        <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+            <div class="absolute top-10 left-10 w-64 h-64 rounded-full bg-blue-400 filter blur-3xl"></div>
+            <div class="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-blue-600 filter blur-3xl"></div>
         </div>
-    </nav>
+        
+        <div class="container mx-auto px-4 py-16 md:py-28 relative z-10 text-center">
+            <h1 class="text-3xl md:text-6xl font-black mb-6 leading-tight">
+                Invierte en el Futuro <br class="hidden md:block"> de <span class="text-blue-400">North Port, FL</span>
+            </h1>
+            <p class="text-base md:text-xl text-blue-100/80 max-w-2xl mx-auto font-medium px-4">
+                Terrenos residenciales en zonas de alta plusvalía. Listos para construir la casa de tus sueños o asegurar tu capital.
+            </p>
+        </div>
+    </section>
 
-    <main class="flex flex-1 overflow-hidden">
-        <!-- Barra Lateral: Lista de Activos -->
-        <aside class="w-full md:w-96 bg-white border-r border-slate-200 flex flex-col shrink-0 shadow-sm z-10">
-            <div class="p-4 border-b border-slate-100 bg-slate-50/50">
-                <label class="relative block">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </span>
-                    <input type="text" id="search" placeholder="Buscar por calle o parcela..." class="w-full bg-white pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
-                </label>
-            </div>
+    <!-- Catalog Grid Responsivo -->
+    <main class="container mx-auto px-4 py-12 md:py-20">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
             
-            <div id="property-list" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
-                <!-- Las propiedades se inyectan mediante JavaScript -->
-            </div>
-        </aside>
-
-        <!-- Contenedor del Mapa -->
-        <section class="flex-1 relative">
-            <div id="map"></div>
-            
-            <!-- Botón flotante para móviles -->
-            <div class="absolute bottom-6 left-1/2 -translate-x-1/2 md:hidden z-[1000]">
-                <button onclick="document.querySelector('aside').scrollIntoView({behavior:'smooth'})" class="bg-slate-900 text-white px-6 py-2 rounded-full shadow-2xl text-sm font-bold flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                    Ver Lista
-                </button>
-            </div>
-        </section>
-    </main>
-
-    <!-- Leaflet JS: Librería de mapas -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <script>
-        // Datos de las propiedades extraídos de tus documentos
-        const properties = [
-            {
-                id: "0969061909",
-                address: "HAMER TER",
-                city: "North Port, FL",
-                zip: "34291",
-                price: 17000,
-                area: "10,625 SF",
-                lat: 27.0855,
-                lng: -82.1645,
-                use: "Residential Vacant",
-                status: "Activo"
-            },
-            {
-                id: "0970061722",
-                address: "EUREKA AVE",
-                city: "North Port, FL",
-                zip: "34291",
-                price: 11500,
-                area: "10,000 SF",
-                lat: 27.0818,
-                lng: -82.1578,
-                use: "Residential Vacant",
-                status: "Activo"
-            },
-            {
-                id: "1135078309",
-                address: "CAROLINA ST",
-                city: "North Port, FL",
-                zip: "34288",
-                price: 11900,
-                area: "10,399 SF",
-                lat: 27.0442,
-                lng: -82.1248,
-                use: "Residential Vacant",
-                status: "Activo"
-            },
-            {
-                id: "1136077906",
-                address: "BENNINGTON ST",
-                city: "North Port, FL",
-                zip: "34288",
-                price: 12500,
-                area: "10,000 SF",
-                lat: 27.0415,
-                lng: -82.1315,
-                use: "Residential Vacant",
-                status: "Activo"
-            }
-        ];
-
-        // 1. Inicializar el mapa
-        const map = L.map('map', {
-            zoomControl: false
-        }).setView([27.065, -82.145], 12);
-
-        L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-        // 2. Cargar el estilo visual del mapa
-        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
-
-        const listContainer = document.getElementById('property-list');
-        const markers = {};
-
-        // 3. Función para centrar el mapa al hacer clic
-        function focusProperty(id) {
-            const prop = properties.find(p => p.id === id);
-            map.flyTo([prop.lat, prop.lng], 15, { duration: 1.5 });
-            markers[id].openPopup();
-            
-            // Si es móvil, desplaza al mapa
-            if (window.innerWidth < 768) {
-                document.querySelector('section').scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-
-        // 4. Crear marcadores y elementos de lista
-        properties.forEach(prop => {
-            // Marcador en el mapa
-            const marker = L.marker([prop.lat, prop.lng]).addTo(map);
-            markers[prop.id] = marker;
-
-            const popupContent = `
-                <div class="custom-popup min-w-[180px]">
-                    <div class="text-[9px] font-bold text-blue-600 uppercase tracking-tighter mb-1">${prop.use}</div>
-                    <div class="font-bold text-slate-800 text-sm mb-2">${prop.address}</div>
-                    <div class="flex justify-between items-center bg-slate-50 p-2 rounded-lg">
-                        <span class="text-xs font-bold text-green-600">$${prop.price.toLocaleString()}</span>
-                        <span class="text-[10px] text-slate-400 font-mono">${prop.id}</span>
+            <!-- Propiedad 1: Lot 4 Eureka Ave -->
+            <div class="property-card bg-white rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden flex flex-col border border-slate-100 group">
+                <a href="Lot_4_Eureka_Ave_North_Pt_FL_34291.jpg" class="glightbox h-56 sm:h-64 overflow-hidden relative block">
+                    <img src="Lot_4_Eureka_Ave_North_Pt_FL_34291.jpg" alt="Lot 4 Eureka Ave" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="bg-white/90 text-blue-900 font-bold px-4 py-2 rounded-full text-sm">Ver Mapa 🔍</span>
+                    </div>
+                </a>
+                <div class="p-5 md:p-8 flex-grow">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="bg-blue-100 text-blue-800 text-[10px] font-black uppercase px-2 py-1 rounded">Disponible</span>
+                        <span class="text-2xl font-black text-emerald-600">$25,000</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900 mb-4">Lot 4 Eureka Ave</h2>
+                    <div class="space-y-3 text-sm text-slate-600 border-t border-slate-50 pt-4">
+                        <p class="flex justify-between"><span>📍 Ubicación:</span> <span class="text-slate-900 font-medium">North Pt, FL 34291</span></p>
+                        <p class="flex justify-between"><span>📏 Área:</span> <span class="text-slate-900 font-medium">929.03 m²</span></p>
+                        <p class="flex justify-between"><span>🏗️ Zonificación:</span> <span class="text-slate-900 font-medium">SF2 - Unifamiliar</span></p>
                     </div>
                 </div>
-            `;
-            marker.bindPopup(popupContent);
-
-            // Tarjeta lateral
-            const card = document.createElement('div');
-            card.className = "property-card bg-white p-4 rounded-2xl border border-slate-200 cursor-pointer shadow-sm";
-            card.onclick = () => focusProperty(prop.id);
-            card.innerHTML = `
-                <div class="flex justify-between items-start mb-2">
-                    <span class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-md text-[10px] font-bold uppercase tracking-wider">${prop.status}</span>
-                    <span class="text-sm font-black text-slate-900">$${prop.price.toLocaleString()}</span>
+                <div class="px-5 md:px-8 pb-8">
+                    <button class="w-full bg-blue-950 text-white font-bold py-4 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/20 active:scale-95 transform">Solicitar Detalles</button>
                 </div>
-                <h3 class="font-bold text-slate-800 text-sm mb-1">${prop.address}</h3>
-                <p class="text-[11px] text-slate-400 mb-4">${prop.city}, FL ${prop.zip}</p>
-                <div class="flex items-center justify-between border-t border-slate-50 pt-3 text-[10px] font-semibold text-slate-500 uppercase">
-                    <span class="flex items-center gap-1">📏 ${prop.area}</span>
-                    <span class="font-mono text-slate-300">ID: ${prop.id.substring(0,6)}...</span>
-                </div>
-            `;
-            listContainer.appendChild(card);
-        });
+            </div>
 
-        // 5. Buscador funcional
-        document.getElementById('search').addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('.property-card');
-            
-            properties.forEach((prop, index) => {
-                const match = prop.address.toLowerCase().includes(term) || prop.id.includes(term);
-                cards[index].style.display = match ? 'block' : 'none';
-            });
+            <!-- Propiedad 2: Lot 22 Eureka Ave -->
+            <div class="property-card bg-white rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden flex flex-col border border-slate-100 group">
+                <a href="Lot_22_Eureka_Ave_North_Pt_FL_34291.jpg" class="glightbox h-56 sm:h-64 overflow-hidden relative block">
+                    <img src="Lot_22_Eureka_Ave_North_Pt_FL_34291.jpg" alt="Lot 22 Eureka Ave" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="bg-white/90 text-blue-900 font-bold px-4 py-2 rounded-full text-sm">Ver Mapa 🔍</span>
+                    </div>
+                </a>
+                <div class="p-5 md:p-8 flex-grow">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="bg-blue-100 text-blue-800 text-[10px] font-black uppercase px-2 py-1 rounded">Disponible</span>
+                        <span class="text-2xl font-black text-emerald-600">$25,000</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900 mb-4">Lot 22 Eureka Ave</h2>
+                    <div class="space-y-3 text-sm text-slate-600 border-t border-slate-50 pt-4">
+                        <p class="flex justify-between"><span>📍 Ubicación:</span> <span class="text-slate-900 font-medium">North Pt, FL 34291</span></p>
+                        <p class="flex justify-between"><span>📏 Área:</span> <span class="text-slate-900 font-medium">929.03 m²</span></p>
+                        <p class="flex justify-between"><span>🏗️ Zonificación:</span> <span class="text-slate-900 font-medium">SF2 - Unifamiliar</span></p>
+                    </div>
+                </div>
+                <div class="px-5 md:px-8 pb-8">
+                    <button class="w-full bg-blue-950 text-white font-bold py-4 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/20 active:scale-95 transform">Solicitar Detalles</button>
+                </div>
+            </div>
+
+            <!-- Propiedad 3: Afterglow #5 -->
+            <div class="property-card bg-white rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden flex flex-col border border-slate-100 group">
+                <a href="Afterglow_5_North_Pt_FL_34286.jpg" class="glightbox h-56 sm:h-64 overflow-hidden relative block">
+                    <img src="Afterglow_5_North_Pt_FL_34286.jpg" alt="Afterglow 5" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="bg-white/90 text-blue-900 font-bold px-4 py-2 rounded-full text-sm">Ver Mapa 🔍</span>
+                    </div>
+                </a>
+                <div class="p-5 md:p-8 flex-grow">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="bg-blue-100 text-blue-800 text-[10px] font-black uppercase px-2 py-1 rounded">Excelente Precio</span>
+                        <span class="text-2xl font-black text-emerald-600">$18,000</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900 mb-4">Afterglow #5</h2>
+                    <div class="space-y-3 text-sm text-slate-600 border-t border-slate-50 pt-4">
+                        <p class="flex justify-between"><span>📍 Ubicación:</span> <span class="text-slate-900 font-medium">North Pt, FL 34286</span></p>
+                        <p class="flex justify-between"><span>📏 Área:</span> <span class="text-slate-900 font-medium">929.03 m²</span></p>
+                        <p class="flex justify-between"><span>🏗️ Zonificación:</span> <span class="text-slate-900 font-medium">SF2</span></p>
+                    </div>
+                </div>
+                <div class="px-5 md:px-8 pb-8">
+                    <button class="w-full bg-blue-950 text-white font-bold py-4 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/20 active:scale-95 transform">Solicitar Detalles</button>
+                </div>
+            </div>
+
+            <!-- Propiedad 4: Langlais Dr #17 -->
+            <div class="property-card bg-white rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden flex flex-col border border-slate-100 group">
+                <a href="Langlais_Dr_17_North_Pt_FL_34286.jpg" class="glightbox h-56 sm:h-64 overflow-hidden relative block">
+                    <img src="Langlais_Dr_17_North_Pt_FL_34286.jpg" alt="Langlais Dr 17" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="bg-white/90 text-blue-900 font-bold px-4 py-2 rounded-full text-sm">Ver Mapa 🔍</span>
+                    </div>
+                </a>
+                <div class="p-5 md:p-8 flex-grow">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="bg-blue-100 text-blue-800 text-[10px] font-black uppercase px-2 py-1 rounded">Oferta</span>
+                        <span class="text-2xl font-black text-emerald-600">$18,000</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900 mb-4">Langlais Dr #17</h2>
+                    <div class="space-y-3 text-sm text-slate-600 border-t border-slate-50 pt-4">
+                        <p class="flex justify-between"><span>📍 Ubicación:</span> <span class="text-slate-900 font-medium">North Pt, FL 34286</span></p>
+                        <p class="flex justify-between"><span>📏 Área:</span> <span class="text-slate-900 font-medium">911.75 m²</span></p>
+                        <p class="flex justify-between"><span>🏗️ Zonificación:</span> <span class="text-slate-900 font-medium">SF2</span></p>
+                    </div>
+                </div>
+                <div class="px-5 md:px-8 pb-8">
+                    <button class="w-full bg-blue-950 text-white font-bold py-4 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/20 active:scale-95 transform">Solicitar Detalles</button>
+                </div>
+            </div>
+
+            <!-- Propiedad 5: Annatto St #8 -->
+            <div class="property-card bg-white rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden flex flex-col border border-slate-100 group">
+                <a href="Annatto_St_8_North_Pt_FL_34286.jpg" class="glightbox h-56 sm:h-64 overflow-hidden relative block">
+                    <img src="Annatto_St_8_North_Pt_FL_34286.jpg" alt="Annatto St 8" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="bg-white/90 text-blue-900 font-bold px-4 py-2 rounded-full text-sm">Ver Mapa 🔍</span>
+                    </div>
+                </a>
+                <div class="p-5 md:p-8 flex-grow">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="bg-blue-100 text-blue-800 text-[10px] font-black uppercase px-2 py-1 rounded">Disponible</span>
+                        <span class="text-2xl font-black text-emerald-600">$18,000</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900 mb-4">Annatto St #8</h2>
+                    <div class="space-y-3 text-sm text-slate-600 border-t border-slate-50 pt-4">
+                        <p class="flex justify-between"><span>📍 Ubicación:</span> <span class="text-slate-900 font-medium">North Pt, FL 34286</span></p>
+                        <p class="flex justify-between"><span>📏 Área:</span> <span class="text-slate-900 font-medium">929.03 m²</span></p>
+                        <p class="flex justify-between"><span>🏗️ Zonificación:</span> <span class="text-slate-900 font-medium">SF2</span></p>
+                    </div>
+                </div>
+                <div class="px-5 md:px-8 pb-8">
+                    <button class="w-full bg-blue-950 text-white font-bold py-4 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/20 active:scale-95 transform">Solicitar Detalles</button>
+                </div>
+            </div>
+
+            <!-- Propiedad 6: Lote #9 Lancewood Rd -->
+            <div class="property-card bg-white rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden flex flex-col border border-slate-100 group">
+                <a href="LOTE_9_LANCEWOOD_ROAD_NORTH_PORT_SARASOTA_FL.jpg" class="glightbox h-56 sm:h-64 overflow-hidden relative block">
+                    <img src="LOTE_9_LANCEWOOD_ROAD_NORTH_PORT_SARASOTA_FL.jpg" alt="Lancewood Rd 9" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="bg-white/90 text-blue-900 font-bold px-4 py-2 rounded-full text-sm">Ver Mapa 🔍</span>
+                    </div>
+                </a>
+                <div class="p-5 md:p-8 flex-grow">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="bg-blue-100 text-blue-800 text-[10px] font-black uppercase px-2 py-1 rounded">Lote Grande</span>
+                        <span class="text-2xl font-black text-emerald-600">$18,000</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900 mb-4">Lote #9 Lancewood Rd</h2>
+                    <div class="space-y-3 text-sm text-slate-600 border-t border-slate-50 pt-4">
+                        <p class="flex justify-between"><span>📍 Ubicación:</span> <span class="text-slate-900 font-medium">North Port, Sarasota</span></p>
+                        <p class="flex justify-between"><span>📏 Área:</span> <span class="text-slate-900 font-medium">1,041 m² (11,214 ft²)</span></p>
+                        <p class="flex justify-between"><span>🏗️ Zonificación:</span> <span class="text-slate-900 font-medium">SF2 Residencial Low</span></p>
+                    </div>
+                </div>
+                <div class="px-5 md:px-8 pb-8">
+                    <button class="w-full bg-blue-950 text-white font-bold py-4 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/20 active:scale-95 transform">Solicitar Detalles</button>
+                </div>
+            </div>
+
+            <!-- Propiedad 7: 309 Hamden St -->
+            <div class="property-card bg-white rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden flex flex-col border border-slate-100 group">
+                <a href="309_HAMDEN_ST_PORT_CHARLOTTE_FL.jpeg" class="glightbox h-56 sm:h-64 overflow-hidden relative block">
+                    <img src="309_HAMDEN_ST_PORT_CHARLOTTE_FL.jpeg" alt="309 Hamden St" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="bg-white/90 text-blue-900 font-bold px-4 py-2 rounded-full text-sm">Ver Mapa 🔍</span>
+                    </div>
+                </a>
+                <div class="p-5 md:p-8 flex-grow">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="bg-blue-100 text-blue-800 text-[10px] font-black uppercase px-2 py-1 rounded">Nuevo</span>
+                        <span class="text-2xl font-black text-emerald-600">$25,000</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900 mb-4">309 Hamden St</h2>
+                    <div class="space-y-3 text-sm text-slate-600 border-t border-slate-50 pt-4">
+                        <p class="flex justify-between"><span>📍 Ubicación:</span> <span class="text-slate-900 font-medium">Port Charlotte, FL</span></p>
+                        <p class="flex justify-between"><span>🏛️ Municipio:</span> <span class="text-slate-900 font-medium">North Port</span></p>
+                        <p class="flex justify-between"><span>🏗️ Estatus:</span> <span class="text-slate-900 font-medium">Disponible</span></p>
+                    </div>
+                </div>
+                <div class="px-5 md:px-8 pb-8">
+                    <button class="w-full bg-blue-950 text-white font-bold py-4 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/20 active:scale-95 transform">Solicitar Detalles</button>
+                </div>
+            </div>
+
+            <!-- Propiedad 8: 218 & 226 Hamden St -->
+            <div class="property-card bg-blue-900 rounded-2xl shadow-xl shadow-blue-200/50 overflow-hidden flex flex-col border border-blue-800 group">
+                <a href="AND_5_218_AND_226_HAMDEN_ST_PORT_CHARLOTTE_FL.jpg" class="glightbox h-56 sm:h-64 overflow-hidden relative block">
+                    <img src="AND_5_218_AND_226_HAMDEN_ST_PORT_CHARLOTTE_FL.jpg" alt="Hamden St Combo" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-500">
+                    <div class="absolute inset-0 bg-blue-900/40 flex items-center justify-center">
+                        <span class="bg-white text-blue-900 font-black px-4 py-2 rounded-full text-[10px] uppercase tracking-widest">Oportunidad Única</span>
+                    </div>
+                </a>
+                <div class="p-5 md:p-8 flex-grow text-white">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="bg-blue-400 text-blue-950 text-[10px] font-black uppercase px-2 py-1 rounded">Doble Lote</span>
+                        <span class="text-2xl font-black text-blue-200">$60,000</span>
+                    </div>
+                    <h2 class="text-xl font-bold mb-4">218 & 226 Hamden St</h2>
+                    <p class="text-sm text-blue-200 mb-6 italic">Dos terrenos adyacentes vendidos como un solo paquete de inversión.</p>
+                </div>
+                <div class="px-5 md:px-8 pb-8">
+                    <button class="w-full bg-blue-400 text-blue-950 font-black py-4 rounded-xl hover:bg-white transition shadow-lg active:scale-95 transform">Comprar Paquete</button>
+                </div>
+            </div>
+
+            <!-- Propiedad 9: Harwood St -->
+            <div class="property-card bg-white rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden flex flex-col border border-slate-100 group">
+                <a href="HARWOOD_ST_NORTH_PORT_SARASOTA_FL_34288.jpg" class="glightbox h-56 sm:h-64 overflow-hidden relative block">
+                    <img src="HARWOOD_ST_NORTH_PORT_SARASOTA_FL_34288.jpg" alt="Harwood St" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="bg-white/90 text-blue-900 font-bold px-4 py-2 rounded-full text-sm">Ver Mapa 🔍</span>
+                    </div>
+                </a>
+                <div class="p-5 md:p-8 flex-grow">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="bg-blue-100 text-blue-800 text-[10px] font-black uppercase px-2 py-1 rounded">Plusvalía</span>
+                        <span class="text-2xl font-black text-emerald-600">$20,000</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-900 mb-4">Harwood St</h2>
+                    <div class="space-y-3 text-sm text-slate-600 border-t border-slate-50 pt-4">
+                        <p class="flex justify-between"><span>📍 Ubicación:</span> <span class="text-slate-900 font-medium">North Port, FL 34288</span></p>
+                        <p class="flex justify-between"><span>🏛️ Municipio:</span> <span class="text-slate-900 font-medium">North Port</span></p>
+                        <p class="flex justify-between"><span>🏗️ Estatus:</span> <span class="text-slate-900 font-medium">Zona en Crecimiento</span></p>
+                    </div>
+                </div>
+                <div class="px-5 md:px-8 pb-8">
+                    <button class="w-full bg-blue-950 text-white font-bold py-4 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/20 active:scale-95 transform">Solicitar Detalles</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer Responsivo -->
+    <footer class="bg-slate-950 text-slate-400 py-16">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-10 mb-10 space-y-8 md:space-y-0">
+                <div class="max-w-md">
+                    <h3 class="text-white text-2xl font-black mb-4">Better Solution USA</h3>
+                    <p class="text-sm leading-relaxed">Tu socio estratégico en bienes raíces en Florida. Brindamos soluciones seguras para inversores y familias que buscan construir su futuro en North Port.</p>
+                </div>
+                <div class="flex flex-wrap gap-6 text-sm font-bold text-white uppercase tracking-widest">
+                    <a href="#" class="hover:text-blue-400">Facebook</a>
+                    <a href="#" class="hover:text-blue-400">WhatsApp</a>
+                    <a href="#" class="hover:text-blue-400">Email</a>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-xs">
+                <p>© 2025 Better Solution USA. Registrado en Florida.</p>
+                <p class="italic">La información de zonificación y seguros debe ser verificada independientemente.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts de Funcionalidad -->
+    <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+    <script>
+        // Inicializar GLightbox con soporte completo para móviles y gestos
+        const lightbox = GLightbox({
+            selector: '.glightbox',
+            touchNavigation: true, // Habilitar navegación táctil (swipe)
+            loop: true,
+            zoomable: true,        // Permitir zoom en la imagen abierta
+            draggable: true,       // Permitir arrastrar la imagen
+            openEffect: 'zoom',    // Efecto de apertura suave
+            closeEffect: 'zoom'
         });
     </script>
 </body>
