@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Lotes en Venta</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+
+:root{
+--bg:#eceff1;
+--white:#ffffff;
+--primary:#1a252f;
+--success:#27ae60;
+}
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
+body{
+font-family:Segoe UI,system-ui;
+background:var(--bg);
+padding:20px;
+}
+
+/* MAPA */
+
+#map{
+height:450px;
+width:100%;
+margin-bottom:35px;
+border-radius:10px;
+box-shadow:0 6px 20px rgba(0,0,0,0.2);
+}
+
+/* GRID */
+
+.property-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+gap:25px;
+max-width:1200px;
+margin:auto;
+}
+
+.property-card{
+background:var(--white);
+border-radius:12px;
+overflow:hidden;
+box-shadow:0 4px 15px rgba(0,0,0,0.1);
+transition:.3s;
+cursor:pointer;
+}
+
+.property-card:hover{
+transform:translateY(-5px);
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.image-box{
+height:220px;
+overflow:hidden;
+}
+
+.image-box img{
+width:100%;
+height:100%;
+object-fit:cover;
+cursor:pointer;
+transition:.4s;
+}
+
+.image-box:hover img{
+transform:scale(1.05);
+}
+
+.details{
+padding:18px;
+}
+
+.price{
+font-size:1.5rem;
+color:var(--success);
+font-weight:bold;
+margin-bottom:10px;
+}
+
+.address{
+font-size:1.05rem;
+font-weight:600;
+color:var(--primary);
+margin-bottom:10px;
+}
+
+/* MODAL ZOOM */
+
+.modal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.95);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:9999;
+}
+
+.modal img{
+width:100%;
+max-width:1400px;
+max-height:95vh;
+object-fit:contain;
+box-shadow:0 0 40px black;
+animation:zoom .3s ease;
+}
+
+@keyframes zoom{
+from{transform:scale(.8)}
+to{transform:scale(1)}
+}
+
+.close{
+position:absolute;
+top:25px;
+right:40px;
+font-size:40px;
+color:white;
+cursor:pointer;
+}
+
+@media(max-width:600px){
+
+body{padding:10px;}
+
+#map{height:350px;}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<div class="property-grid" id="grid"></div>
+
+<div class="modal" id="modal">
+<span class="close" onclick="closeModal()">×</span>
+<img id="modalImg">
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+/* MAPA */
+
+const map = L.map('map').setView([27.044,-82.235],11);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+maxZoom:19
+}).addTo(map);
+
+
+/* DATOS */
+
+const properties=[
+
+{
+addr:"Lot 4 Eureka Ave",
+price:"$25,000",
+lat:27.0705,
+lng:-82.2254,
+img:"Lot_4_Eureka_Ave_North_Pt_FL_34291.jpg"
+},
+
+{
+addr:"Lot 22 Eureka Ave",
+price:"$25,000",
+lat:27.0698,
+lng:-82.2262,
+img:"Lot_22_Eureka_Ave_North_Pt_FL_34291.jpg"
+},
+
+{
+addr:"Afterglow #5",
+price:"$18,000",
+lat:27.047,
+lng:-82.220,
+img:"Afterglow_5_North_Pt_FL_34286.jpg"
+},
+
+{
+addr:"Langlais Dr #17",
+price:"$18,000",
+lat:27.050,
+lng:-82.230,
+img:"Langlais_Dr_17_North_Pt_FL_34286.jpg"
+},
+
+{
+addr:"Annatto St #8",
+price:"$18,000",
+lat:27.051,
+lng:-82.228,
+img:"Annatto_St_8_North_Pt_FL_34286.jpg"
+}
+
+];
+
+
+/* TARJETAS */
+
+const grid=document.getElementById("grid");
+
+properties.forEach(p=>{
+
+const card=document.createElement("div");
+
+card.className="property-card";
+
+card.innerHTML=`
+
+<div class="image-box">
+<img src="${p.img}" onclick="openModal('${p.img}')" onerror="this.src='https://via.placeholder.com/600x400?text=Imagen+no+disponible'">
+</div>
+
+<div class="details">
+
+<div class="price">${p.price}</div>
+
+<div class="address">${p.addr}</div>
+
+</div>
+
+`;
+
+card.onclick=()=>{
+
+map.flyTo([p.lat,p.lng],15);
+
+};
+
+grid.appendChild(card);
+
+
+/* MARCADOR MAPA */
+
+const marker=L.marker([p.lat,p.lng]).addTo(map);
+
+marker.bindPopup(`<b>${p.addr}</b><br>${p.price}`);
+
+});
+
+
+/* MODAL */
+
+function openModal(src){
+
+document.getElementById("modalImg").src=src;
+
+document.getElementById("modal").style.display="flex";
+
+}
+
+function closeModal(){
+
+document.getElementById("modal").style.display="none";
+
+}
+
+document.getElementById("modal").onclick=function(e){
+
+if(e.target.id==="modal") closeModal();
+
+}
+
+document.addEventListener("keydown",function(e){
+
+if(e.key==="Escape") closeModal();
+
+});
+
+</script>
+
+</body>
+</html>
