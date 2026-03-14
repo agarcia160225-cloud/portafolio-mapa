@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inmobiliaria - Lotes en Venta</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS (Alternativa gratuita a Google Maps) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         
@@ -17,7 +20,8 @@
             height: 500px;
             width: 100%;
             border-radius: 1rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         .active-card {
@@ -26,13 +30,10 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
-        .custom-info-window {
-            padding: 8px;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
+        /* Estilo para los popups del mapa */
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            padding: 4px;
         }
     </style>
 </head>
@@ -50,11 +51,6 @@
                 </div>
                 <span class="text-xl font-bold tracking-tight">GeoLotes <span class="text-green-600">Pro</span></span>
             </div>
-            <nav class="hidden md:flex gap-6 text-sm font-medium text-slate-600">
-                <a href="#" class="hover:text-green-600 transition">Inicio</a>
-                <a href="#" class="hover:text-green-600 transition">Propiedades</a>
-                <a href="#" class="hover:text-green-600 transition">Contacto</a>
-            </nav>
             <button class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-800 transition">
                 Publicar Lote
             </button>
@@ -66,7 +62,7 @@
             <div class="flex items-end justify-between mb-4">
                 <div>
                     <h1 class="text-3xl font-bold text-slate-900">Lotes Disponibles</h1>
-                    <p class="text-slate-500">Explora terrenos exclusivos en North Port, FL</p>
+                    <p class="text-slate-500">Vista satelital de terrenos en North Port, FL</p>
                 </div>
                 <div class="flex gap-2">
                     <span class="flex items-center gap-1 text-sm font-medium bg-green-100 text-green-700 px-3 py-1 rounded-full">
@@ -75,6 +71,8 @@
                     </span>
                 </div>
             </div>
+            
+            <!-- Contenedor del Mapa -->
             <div id="map"></div>
         </section>
 
@@ -83,15 +81,18 @@
         </section>
     </main>
 
-    <div id="modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden items-center justify-center p-4 backdrop-blur-sm transition-opacity duration-300" onclick="closeModal()">
-        <button class="absolute top-6 right-6 text-white hover:scale-110 transition" onclick="closeModal()">
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden items-center justify-center p-4 backdrop-blur-sm" onclick="closeModal()">
+        <button class="absolute top-6 right-6 text-white">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
-        <img id="modalImg" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl transition-transform duration-300 scale-95" src="" alt="Vista previa">
+        <img id="modalImg" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl transition-transform duration-300 scale-95" src="">
     </div>
 
+    <!-- Scripts de Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         let map;
         let markers = [];
@@ -128,40 +129,33 @@
             }
         ];
 
-        function initMap() {
-            map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 12,
-                center: { lat: 27.060, lng: -82.225 },
-                mapTypeId: "satellite",
-                tilt: 45
-            });
+        function initApp() {
+            // Inicializar mapa de Leaflet
+            map = L.map('map').setView([27.060, -82.225], 13);
+
+            // Capa satelital de Esri (Gratuita y profesional)
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            }).addTo(map);
 
             buildCards();
 
             properties.forEach((p, index) => {
-                const marker = new google.maps.Marker({
-                    position: { lat: p.lat, lng: p.lng },
-                    map: map,
-                    title: p.addr,
-                    animation: google.maps.Animation.DROP,
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 10,
-                        fillColor: "#22c55e",
-                        fillOpacity: 1,
-                        strokeWeight: 2,
-                        strokeColor: "#ffffff",
-                    }
-                });
+                // Crear marcador personalizado
+                const marker = L.circleMarker([p.lat, p.lng], {
+                    radius: 10,
+                    fillColor: "#22c55e",
+                    color: "#fff",
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.9
+                }).addTo(map);
 
+                marker.bindPopup(`<div class="p-1"><b class="block text-slate-900">${p.addr}</b><span class="text-green-600 font-bold">${p.price}</span></div>`);
+                
                 markers.push(marker);
 
-                const infoWindow = new google.maps.InfoWindow({
-                    content: `<div class="custom-info-window"><h3 class="font-bold">${p.addr}</h3><p class="text-green-600">${p.price}</p></div>`
-                });
-
-                marker.addListener("click", () => {
-                    infoWindow.open(map, marker);
+                marker.on('click', () => {
                     highlightCard(index);
                 });
             });
@@ -169,6 +163,7 @@
 
         function buildCards() {
             const grid = document.getElementById("grid");
+            grid.innerHTML = "";
             properties.forEach((p, index) => {
                 const card = document.createElement("div");
                 card.className = "property-card group bg-white border border-slate-200 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl";
@@ -185,14 +180,14 @@
                         <p class="text-slate-500 text-sm mb-4">${p.city}</p>
                         <div class="flex items-center justify-between border-t border-slate-100 pt-4">
                             <span class="text-sm font-semibold text-slate-700">${p.size}</span>
-                            <button class="text-green-600 font-bold text-sm">Ver mapa</button>
+                            <button class="text-green-600 font-bold text-sm">Ver en mapa</button>
                         </div>
                     </div>
                 `;
 
                 card.onclick = () => {
-                    map.setZoom(17);
-                    map.panTo({ lat: p.lat, lng: p.lng });
+                    map.flyTo([p.lat, p.lng], 17, { duration: 1.5 });
+                    markers[index].openPopup();
                     highlightCard(index);
                 };
 
@@ -203,14 +198,10 @@
         function highlightCard(index) {
             document.querySelectorAll('.property-card').forEach(c => c.classList.remove('active-card'));
             const selectedCard = document.getElementById('card-' + index);
-            selectedCard.classList.add('active-card');
-            selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            markers.forEach((m, i) => {
-                if(i === index) {
-                    m.setAnimation(google.maps.Animation.BOUNCE);
-                    setTimeout(() => m.setAnimation(null), 1500);
-                }
-            });
+            if (selectedCard) {
+                selectedCard.classList.add('active-card');
+                selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
 
         function openModal(src) {
@@ -224,9 +215,9 @@
         function closeModal() {
             document.getElementById("modal").classList.add("hidden");
         }
-    </script>
 
-    <!-- RECUERDA REEMPLAZAR TU_API_KEY -->
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD9FdCW9CYeVsMb41Qwyt-PvXP1oUuslgIcallback=initMap"></script>
+        // Iniciar al cargar
+        window.onload = initApp;
+    </script>
 </body>
 </html>
