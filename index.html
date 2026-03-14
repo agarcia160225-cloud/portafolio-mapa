@@ -17,13 +17,13 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Altura responsiva para el mapa */
         #map {
             height: 350px;
             width: 100%;
             border-radius: 1rem;
             z-index: 10;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            scroll-margin-top: 80px; /* Espacio para que el mapa no quede pegado al header al scrollar */
         }
 
         @media (min-width: 768px) {
@@ -51,12 +51,10 @@
             letter-spacing: 0.025em;
         }
 
-        /* Suavizar scroll */
         html {
             scroll-behavior: smooth;
         }
 
-        /* Ajustes para evitar que el modal se desborde */
         #modalImg {
             object-fit: contain;
         }
@@ -64,7 +62,6 @@
 </head>
 <body class="text-slate-800">
 
-    <!-- Encabezado Responsivo -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -85,7 +82,6 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-6 md:py-8">
-        <!-- Sección del Mapa -->
         <section class="mb-8 md:mb-12">
             <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-4 md:mb-6 gap-3">
                 <div>
@@ -100,15 +96,11 @@
             <div id="map"></div>
         </section>
 
-        <!-- Cuadrícula de Propiedades -->
         <section>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8" id="grid">
-                <!-- Las tarjetas se generan dinámicamente -->
-            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8" id="grid"></div>
         </section>
     </main>
 
-    <!-- Modal de Imagen -->
     <div id="modal" class="fixed inset-0 bg-slate-900/95 z-[100] hidden items-center justify-center p-2 backdrop-blur-sm" onclick="closeModal()">
         <button class="absolute top-4 right-4 text-white p-2" onclick="closeModal()">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -118,7 +110,6 @@
         <img id="modalImg" class="max-w-full max-h-[85vh] rounded-lg shadow-2xl transition-transform duration-300 scale-95" src="" alt="Vista ampliada">
     </div>
 
-    <!-- Scripts de Leaflet -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         let map;
@@ -237,7 +228,7 @@
 
         function initApp() {
             map = L.map('map', {
-                scrollWheelZoom: false // Evita zoom accidental al hacer scroll en móvil
+                scrollWheelZoom: false
             }).setView([27.040, -82.180], 12);
 
             L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -267,8 +258,16 @@
 
                 marker.on('click', () => {
                     highlightCard(index);
+                    // Al hacer click en el marcador también desplazamos al mapa para centrar la vista
+                    document.getElementById("map").scrollIntoView({ behavior: "smooth", block: "start" });
                 });
             });
+        }
+
+        function handleImageError(img, fileName) {
+            console.warn(`Error al cargar la imagen: ${fileName}`);
+            img.src = `https://via.placeholder.com/600x400?text=Lote+disponible`;
+            img.onerror = null;
         }
 
         function buildCards() {
@@ -279,13 +278,11 @@
                 card.className = "property-card group bg-white border border-slate-200 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl flex flex-col";
                 card.id = "card-" + index;
 
-                const placeholder = `https://via.placeholder.com/600x400?text=Lote+en+Venta`;
-
                 card.innerHTML = `
                     <div class="relative h-48 md:h-52 overflow-hidden bg-slate-100">
                         <img src="${p.img}" 
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                             onerror="this.src='${placeholder}'"
+                             onerror="handleImageError(this, '${p.img}')"
                              onclick="event.stopPropagation(); openModal(this.src)">
                         <div class="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded-full text-[9px] font-bold shadow-sm uppercase tracking-widest text-slate-700 border border-white/50">Disponible</div>
                         <div class="absolute bottom-3 right-3 bg-green-600 text-white px-3 py-1 rounded-xl text-md md:text-lg font-bold shadow-lg border border-green-500/30">${p.price}</div>
@@ -333,9 +330,14 @@
 
                 card.onclick = () => {
                     const zoomLevel = window.innerWidth < 768 ? 16 : 17;
+                    
+                    // Acción 1: Volar al lugar en el mapa
                     map.flyTo([p.lat, p.lng], zoomLevel, { duration: 1.5 });
                     markers[index].openPopup();
                     highlightCard(index);
+
+                    // Acción 2: Redireccionar (scroll) al mapa
+                    document.getElementById("map").scrollIntoView({ behavior: "smooth", block: "start" });
                 };
 
                 grid.appendChild(card);
@@ -347,10 +349,6 @@
             const selectedCard = document.getElementById('card-' + index);
             if (selectedCard) {
                 selectedCard.classList.add('active-card');
-                // En móviles, el scroll se hace con un pequeño retraso para asegurar que el mapa terminó de moverse
-                setTimeout(() => {
-                    selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
             }
         }
 
@@ -360,7 +358,6 @@
             modalImg.src = src;
             modal.classList.remove("hidden");
             modal.classList.add("flex");
-            // Pequeña animación
             setTimeout(() => {
                 modalImg.classList.remove("scale-95");
                 modalImg.classList.add("scale-100");
