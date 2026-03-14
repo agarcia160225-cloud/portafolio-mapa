@@ -11,7 +11,7 @@
 <style>
 
 body{
-font-family:Segoe UI,system-ui;
+font-family:Segoe UI,Arial;
 background:#eceff1;
 margin:0;
 padding:20px;
@@ -88,8 +88,8 @@ z-index:9999;
 }
 
 .modal img{
-max-width:90%;
-max-height:90%;
+max-width:95%;
+max-height:95%;
 }
 
 .close{
@@ -154,9 +154,12 @@ map=new google.maps.Map(document.getElementById("map"),{
 
 zoom:11,
 center:{lat:27.044,lng:-82.235},
-mapTypeControl:true
+mapTypeControl:true,
+mapTypeId:"satellite"
 
 });
+
+buildCards();
 
 properties.forEach((p,index)=>{
 
@@ -184,8 +187,6 @@ document.getElementById("card-"+index).scrollIntoView({behavior:"smooth"});
 
 });
 
-buildCards();
-
 }
 
 function buildCards(){
@@ -204,7 +205,7 @@ card.innerHTML=`
 
 <div class="image-box">
 
-<img src="${p.img}" onclick="openModal('${p.img}')">
+<img src="${p.img}" onclick="openModal('${p.img}')" onerror="this.src='https://via.placeholder.com/600x400?text=Imagen+no+disponible'">
 
 </div>
 
@@ -220,7 +221,7 @@ card.innerHTML=`
 
 card.onclick=()=>{
 
-map.setZoom(15);
+map.setZoom(16);
 
 map.panTo({lat:p.lat,lng:p.lng});
 
