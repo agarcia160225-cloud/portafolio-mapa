@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ilo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listaan dagiti Pasada - North Port & Port Charlotte</title>
+    <style>
+        /* Dagiti kolor ken estilo ti disenio */
+        :root {
+            --primary: #1a252f;
+            --accent: #2980b9;
+            --bg: #eceff1;
+            --text: #2c3e50;
+            --white: #ffffff;
+            --success: #27ae60;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        /* Disenio ti Grid para kadagiti card */
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .property-card {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .image-box {
+            position: relative;
+            height: 220px;
+            cursor: zoom-in;
+            background: #ccc;
+        }
+
+        .image-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .zoom-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            pointer-events: none;
+        }
+
+        .details {
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .address {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 15px;
+            min-height: 3.6rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .price {
+            font-size: 1.5rem;
+            color: var(--success);
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .info-list {
+            list-style: none;
+            font-size: 0.9rem;
+        }
+
+        .info-list li {
+            margin-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 4px;
+        }
+
+        .info-list span {
+            font-weight: bold;
+            color: #7f8c8d;
+            display: block;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Modal para iti ladawan */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            border: 3px solid white;
+            border-radius: 4px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px; right: 30px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+        }
+
+        /* Pannakaibagay iti mobile */
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            header h1 { font-size: 1.8rem; }
+            .property-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Listaan dagiti Pasada (Lote)</h1>
+        <p>North Port, Port Charlotte & Sarasota, FL</p>
+    </header>
+
+    <div class="property-grid" id="grid">
+        <!-- Dagiti card ket maparsua ditoy babaen ti JavaScript -->
+    </div>
+
+    <!-- Ti modal window -->
+    <div id="imageModal" class="modal" onclick="this.style.display='none'">
+        <span class="close-btn">&times;</span>
+        <img class="modal-content" id="fullImg">
+    </div>
+
+    <script>
+        // Datos dagiti pasada (Data de las propiedades)
+        const properties = [
+            {
+                addr: "Lot 4 Eureka Ave, North Pt, FL 34291",
+                price: "$25,000",
+                muni: "City of North Port",
+                sub: "1579- PORT CHARLOTTE SUB 14 REPLAT",
+                area: "929.03 m2 (10,000 Sq.Ft.)",
+                zone: "SF2, Residencial, Single Family",
+                flood: "No necesita seguro de inundación",
+                img: "Lot_4_Eureka_Ave_North_Pt_FL_34291.jpg"
+            },
+            {
+                addr: "Lot 22 Eureka Ave, North Pt, FL 34291",
+                price: "$25,000",
+                muni: "City of North Port",
+                sub: "1579- PORT CHARLOTTE SUB 14 REPLAT",
+                area: "929.03 m2 (10,000 Sq.Ft.)",
+                zone: "SF2, Residencial, Single Family",
+                flood: "No necesita seguro de inundación",
+                img: "Lot_22_Eureka_Ave_North_Pt_FL_34291.jpg"
+            },
+            {
+                addr: "Afterglow #5, North Pt, FL 34286",
+                price: "$18,000",
+                muni: "City of North Port",
+                sub: "1778- PORT CHARLOTTE SUB 46",
+                area: "929.03 m2 (10,000 Sq.Ft.)",
+                zone: "SF2, Residencial, Single Family",
+                flood: "No necesita seguro de inundación",
+                img: "Afterglow_5_North_Pt_FL_34286.jpg"
+            },
+            {
+                addr: "Langlais Dr #17, North Pt, FL 34286",
+                price: "$18,000",
+                muni: "City of North Port",
+                sub: "1779- PORT CHARLOTTE SUB 47",
+                area: "911.75 m2 (9,814 Sq.Ft.)",
+                zone: "SF2, Residencial, Single Family",
+                flood: "No necesita seguro de inundación",
+                img: "Langlais_Dr_17_North_Pt_FL_34286.jpg"
+            },
+            {
+                addr: "Annatto St #8, North Pt, FL 34286",
+                price: "$18,000",
+                muni: "City of North Port",
+                sub: "1779- PORT CHARLOTTE SUB 47",
+                area: "929.03 m2 (10,000 Sq.Ft.)",
+                zone: "SF2, Residencial, Single Family",
+                flood: "No necesita seguro de inundación",
+                img: "Annatto_St_8_North_Pt_FL_34286.jpg"
+            },
+            {
+                addr: "LOTE # 9 LANCEWOOD ROAD, NORTH PORT SARASOTA FL",
+                price: "$18,000",
+                muni: "City of North Port",
+                sub: "1779- PORT CHARLOTTE SUB 47",
+                area: "1,041.8 m2 (11,214 Sq.Ft.)",
+                zone: "SF2, Residencial low",
+                flood: "No necesita seguro de inundación",
+                img: "LOTE_9_LANCEWOOD_ROAD_NORTH_PORT_SARASOTA_FL.jpg"
+            },
+            {
+                addr: "309 HAMDEN ST PORT CHARLOTTE FL",
+                price: "$25,000",
+                muni: "City of North Port",
+                sub: "-",
+                area: "-",
+                zone: "-",
+                flood: "-",
+                img: "309_HAMDEN_ST_PORT_CHARLOTTE_FL.jpeg"
+            },
+            {
+                addr: "AND 5 . 218 AND 226 HAMDEN ST PORT CHARLOTTE FL",
+                price: "$60,000",
+                muni: "City of North Port",
+                sub: "2 Lotes",
+                area: "-",
+                zone: "-",
+                flood: "-",
+                img: "AND_5_218_AND_226_HAMDEN_ST_PORT_CHARLOTTE_FL.jpg"
+            },
+            {
+                addr: "HARWOOD ST NORTH PORT SARASOTA FL 34288",
+                price: "$20,000",
+                muni: "City of North Port",
+                sub: "-",
+                area: "-",
+                zone: "-",
+                flood: "-",
+                img: "HARWOOD_ST_NORTH_PORT_SARASOTA_FL_34288.jpg"
+            }
+        ];
+
+        const grid = document.getElementById('grid');
+
+        // Panagaramid kadagiti card (Creación de las tarjetas)
+        properties.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'property-card';
+            card.innerHTML = `
+                <div class="image-box" onclick="showFull('${p.img}')">
+                    <img src="${p.img}" alt="${p.addr}" onerror="this.src='https://via.placeholder.com/400x250?text=Ladawan+ti+Lote'">
+                    <div class="zoom-hint">I-klik tapno lumawa</div>
+                </div>
+                <div class="details">
+                    <div class="price">${p.price}</div>
+                    <div class="address">${p.addr}</div>
+                    <ul class="info-list">
+                        <li><span>Munisipalidad</span> ${p.muni}</li>
+                        <li><span>Subdibision</span> ${p.sub}</li>
+                        <li><span>Area</span> ${p.area}</li>
+                        <li><span>Zonipikasion</span> ${p.zone}</li>
+                        <li><span>Sona ti Layus</span> ${p.flood}</li>
+                    </ul>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        // Paglukat ti modal (Abrir modal)
+        function showFull(src) {
+            document.getElementById('fullImg').src = src;
+            document.getElementById('imageModal').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
