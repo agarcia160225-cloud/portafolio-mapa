@@ -8,8 +8,6 @@
 
 <title>Lotes en Venta</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-
 <style>
 
 body{
@@ -39,8 +37,8 @@ background:white;
 border-radius:12px;
 overflow:hidden;
 box-shadow:0 4px 15px rgba(0,0,0,0.1);
-transition:.3s;
 cursor:pointer;
+transition:.3s;
 }
 
 .property-card:hover{
@@ -58,11 +56,6 @@ width:100%;
 height:100%;
 object-fit:cover;
 cursor:pointer;
-transition:.4s;
-}
-
-.image-box:hover img{
-transform:scale(1.05);
 }
 
 .details{
@@ -77,9 +70,8 @@ margin-bottom:10px;
 }
 
 .address{
-font-size:1.05rem;
+font-size:1rem;
 font-weight:600;
-color:#1a252f;
 }
 
 .modal{
@@ -96,11 +88,8 @@ z-index:9999;
 }
 
 .modal img{
-width:100%;
-max-width:1400px;
-max-height:95vh;
-object-fit:contain;
-box-shadow:0 0 40px black;
+max-width:90%;
+max-height:90%;
 }
 
 .close{
@@ -110,12 +99,6 @@ right:40px;
 font-size:40px;
 color:white;
 cursor:pointer;
-}
-
-@media(max-width:600px){
-
-#map{height:350px;}
-
 }
 
 </style>
@@ -133,18 +116,9 @@ cursor:pointer;
 <img id="modalImg">
 </div>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 <script>
 
-const map = L.map('map').setView([27.044,-82.235],11);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-maxZoom:19
-}).addTo(map);
-
-
-/* PROPIEDADES */
+let map;
 
 const properties=[
 
@@ -170,25 +144,51 @@ price:"$18,000",
 lat:27.047,
 lng:-82.220,
 img:"Afterglow_5_North_Pt_FL_34286.jpg"
-},
-
-{
-addr:"Langlais Dr #17",
-price:"$18,000",
-lat:27.050,
-lng:-82.230,
-img:"Langlais_Dr_17_North_Pt_FL_34286.jpg"
-},
-
-{
-addr:"Annatto St #8",
-price:"$18,000",
-lat:27.051,
-lng:-82.228,
-img:"Annatto_St_8_North_Pt_FL_34286.jpg"
 }
 
 ];
+
+function initMap(){
+
+map=new google.maps.Map(document.getElementById("map"),{
+
+zoom:11,
+center:{lat:27.044,lng:-82.235},
+mapTypeControl:true
+
+});
+
+properties.forEach((p,index)=>{
+
+const marker=new google.maps.Marker({
+
+position:{lat:p.lat,lng:p.lng},
+map:map,
+title:p.addr
+
+});
+
+const info=new google.maps.InfoWindow({
+
+content:`<b>${p.addr}</b><br>${p.price}`
+
+});
+
+marker.addListener("click",()=>{
+
+info.open(map,marker);
+
+document.getElementById("card-"+index).scrollIntoView({behavior:"smooth"});
+
+});
+
+});
+
+buildCards();
+
+}
+
+function buildCards(){
 
 const grid=document.getElementById("grid");
 
@@ -203,7 +203,9 @@ card.id="card-"+index;
 card.innerHTML=`
 
 <div class="image-box">
-<img src="${p.img}" onclick="openModal('${p.img}')" onerror="this.src='https://via.placeholder.com/600x400?text=Imagen+no+disponible'">
+
+<img src="${p.img}" onclick="openModal('${p.img}')">
+
 </div>
 
 <div class="details">
@@ -216,49 +218,19 @@ card.innerHTML=`
 
 `;
 
-grid.appendChild(card);
-
-
-/* MARCADOR */
-
-const marker=L.marker([p.lat,p.lng]).addTo(map);
-
-marker.bindPopup(`<b>${p.addr}</b><br>${p.price}`);
-
-
-/* MAPA → TARJETA */
-
-marker.on("click",()=>{
-
-const card=document.getElementById("card-"+index);
-
-card.scrollIntoView({behavior:"smooth"});
-
-card.style.boxShadow="0 0 25px orange";
-
-setTimeout(()=>{
-
-card.style.boxShadow="";
-
-},2000);
-
-});
-
-
-/* TARJETA → MAPA */
-
 card.onclick=()=>{
 
-map.flyTo([p.lat,p.lng],15);
+map.setZoom(15);
 
-marker.openPopup();
+map.panTo({lat:p.lat,lng:p.lng});
 
 };
 
+grid.appendChild(card);
+
 });
 
-
-/* ZOOM IMAGEN */
+}
 
 function openModal(src){
 
@@ -274,18 +246,10 @@ document.getElementById("modal").style.display="none";
 
 }
 
-document.getElementById("modal").onclick=function(e){
+</script>
 
-if(e.target.id==="modal") closeModal();
-
-};
-
-document.addEventListener("keydown",function(e){
-
-if(e.key==="Escape") closeModal();
-
-});
-
+<script async defer
+src="https://maps.googleapis.com/maps/api/js?key=TU_API_KEY&callback=initMap">
 </script>
 
 </body>
