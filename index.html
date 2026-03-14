@@ -31,7 +31,6 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* Ocultar scrollbar pero mantener funcionalidad */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -63,7 +62,6 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-8">
-        <!-- Map Section -->
         <section class="mb-10">
             <div class="flex items-end justify-between mb-4">
                 <div>
@@ -80,15 +78,11 @@
             <div id="map"></div>
         </section>
 
-        <!-- Properties Grid -->
         <section>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="grid">
-                <!-- Cards injected via JS -->
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="grid"></div>
         </section>
     </main>
 
-    <!-- Modal para Imágenes -->
     <div id="modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden items-center justify-center p-4 backdrop-blur-sm transition-opacity duration-300" onclick="closeModal()">
         <button class="absolute top-6 right-6 text-white hover:scale-110 transition" onclick="closeModal()">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -135,15 +129,11 @@
         ];
 
         function initMap() {
-            // Estilo personalizado para el mapa (opcional)
             map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 12,
                 center: { lat: 27.060, lng: -82.225 },
                 mapTypeId: "satellite",
-                tilt: 45,
-                mapTypeControlOptions: {
-                    position: google.maps.ControlPosition.BOTTOM_LEFT
-                }
+                tilt: 45
             });
 
             buildCards();
@@ -167,17 +157,10 @@
                 markers.push(marker);
 
                 const infoWindow = new google.maps.InfoWindow({
-                    content: `
-                        <div class="custom-info-window">
-                            <h3 class="font-bold text-slate-900">${p.addr}</h3>
-                            <p class="text-green-600 font-bold">${p.price}</p>
-                            <p class="text-xs text-slate-500">${p.size}</p>
-                        </div>
-                    `
+                    content: `<div class="custom-info-window"><h3 class="font-bold">${p.addr}</h3><p class="text-green-600">${p.price}</p></div>`
                 });
 
                 marker.addListener("click", () => {
-                    // Cerrar otros infoWindows si existieran
                     infoWindow.open(map, marker);
                     highlightCard(index);
                 });
@@ -193,37 +176,16 @@
 
                 card.innerHTML = `
                     <div class="relative h-56 overflow-hidden">
-                        <img src="${p.img}" 
-                             alt="${p.addr}"
-                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                             onclick="event.stopPropagation(); openModal('${p.img}')">
-                        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                            Venta
-                        </div>
-                        <div class="absolute bottom-4 right-4 bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-bold shadow-lg">
-                            ${p.price}
-                        </div>
+                        <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onclick="event.stopPropagation(); openModal('${p.img}')">
+                        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold shadow-sm">Venta</div>
+                        <div class="absolute bottom-4 right-4 bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-bold shadow-lg">${p.price}</div>
                     </div>
                     <div class="p-5">
-                        <div class="flex justify-between items-start mb-2">
-                            <h2 class="text-lg font-bold text-slate-900 leading-tight">${p.addr}</h2>
-                        </div>
-                        <p class="text-slate-500 text-sm mb-4 flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            </svg>
-                            ${p.city}
-                        </p>
+                        <h2 class="text-lg font-bold text-slate-900">${p.addr}</h2>
+                        <p class="text-slate-500 text-sm mb-4">${p.city}</p>
                         <div class="flex items-center justify-between border-t border-slate-100 pt-4">
-                            <div class="flex items-center gap-2">
-                                <div class="p-2 bg-slate-100 rounded-lg">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                                    </svg>
-                                </div>
-                                <span class="text-sm font-semibold text-slate-700">${p.size}</span>
-                            </div>
-                            <button class="text-green-600 font-bold text-sm hover:underline">Ver mapa</button>
+                            <span class="text-sm font-semibold text-slate-700">${p.size}</span>
+                            <button class="text-green-600 font-bold text-sm">Ver mapa</button>
                         </div>
                     </div>
                 `;
@@ -239,17 +201,10 @@
         }
 
         function highlightCard(index) {
-            // Quitar clase activa de todas
             document.querySelectorAll('.property-card').forEach(c => c.classList.remove('active-card'));
-            
-            // Añadir clase a la seleccionada
             const selectedCard = document.getElementById('card-' + index);
             selectedCard.classList.add('active-card');
-            
-            // Hacer scroll hasta la tarjeta
             selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Animar el marcador
             markers.forEach((m, i) => {
                 if(i === index) {
                     m.setAnimation(google.maps.Animation.BOUNCE);
@@ -264,28 +219,14 @@
             modalImg.src = src;
             modal.classList.remove("hidden");
             modal.classList.add("flex");
-            setTimeout(() => {
-                modalImg.classList.remove("scale-95");
-                modalImg.classList.add("scale-100");
-            }, 10);
         }
 
         function closeModal() {
-            const modal = document.getElementById("modal");
-            const modalImg = document.getElementById("modalImg");
-            modalImg.classList.remove("scale-100");
-            modalImg.classList.add("scale-95");
-            setTimeout(() => {
-                modal.classList.remove("flex");
-                modal.classList.add("hidden");
-            }, 200);
+            document.getElementById("modal").classList.add("hidden");
         }
     </script>
 
-    <!-- RECUERDA: Debes reemplazar TU_API_KEY con tu clave real de Google Maps -->
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap">
-    </script>
-
+    <!-- RECUERDA REEMPLAZAR TU_API_KEY -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=TU_API_KEY&callback=initMap"></script>
 </body>
 </html>
