@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ilo">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inmobiliaria - Lotes en Venta</title>
+    <title>Inmobiliaria - Magun-od a Lote</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Leaflet CSS (Alternativa gratuita a Google Maps) -->
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
@@ -30,16 +30,22 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
-        /* Estilo para los popups del mapa */
         .leaflet-popup-content-wrapper {
             border-radius: 12px;
             padding: 4px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.75rem;
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body class="text-slate-800">
 
-    <!-- Header -->
+    <!-- Header / Ulu ti Panid -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -52,36 +58,36 @@
                 <span class="text-xl font-bold tracking-tight">GeoLotes <span class="text-green-600">Pro</span></span>
             </div>
             <button class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-800 transition">
-                Publicar Lote
+                Ipalubos ti Lote
             </button>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Map Section / Paset ti Mapa -->
         <section class="mb-10">
             <div class="flex items-end justify-between mb-4">
                 <div>
-                    <h1 class="text-3xl font-bold text-slate-900">Lotes Disponibles</h1>
-                    <p class="text-slate-500">Vista satelital de terrenos en North Port, FL</p>
+                    <h1 class="text-3xl font-bold text-slate-900">Magun-od a Lote</h1>
+                    <p class="text-slate-500">Ladawan ti satelite dagiti daga sadiay North Port ken Port Charlotte</p>
                 </div>
                 <div class="flex gap-2">
                     <span class="flex items-center gap-1 text-sm font-medium bg-green-100 text-green-700 px-3 py-1 rounded-full">
                         <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        3 Disponibles
+                        9 a Magun-od
                     </span>
                 </div>
             </div>
-            
-            <!-- Contenedor del Mapa -->
             <div id="map"></div>
         </section>
 
+        <!-- Properties Grid / Listaan ti Daga -->
         <section>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="grid"></div>
         </section>
     </main>
 
-    <!-- Modal -->
+    <!-- Modal / Tawa ti Ladawan -->
     <div id="modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden items-center justify-center p-4 backdrop-blur-sm" onclick="closeModal()">
         <button class="absolute top-6 right-6 text-white">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -91,66 +97,136 @@
         <img id="modalImg" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl transition-transform duration-300 scale-95" src="">
     </div>
 
-    <!-- Scripts de Leaflet -->
+    <!-- Leaflet Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // Dagiti impormasion ti lote
         let map;
         let markers = [];
         const properties = [
             {
                 id: 0,
-                addr: "Lot 4 Eureka Ave",
+                addr: "Lot 4 Eureka Ave, North Pt, FL 34291",
                 price: "$25,000",
-                size: "0.25 Acres",
-                lat: 27.0705,
-                lng: -82.2254,
-                img: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80",
-                city: "North Port, FL 34291"
+                muni: "City of North Port",
+                sub: "1579- PORT CHARLOTTE SUB 14 REPLAT",
+                area: "929.03 m2 (10,000 Sq.Ft.)",
+                zoning: "SF2, Residencial, Single Family",
+                flood: "No necesita seguro de inundación",
+                lat: 27.0705, lng: -82.2254,
+                img: "Lot_4_Eureka_Ave_North_Pt_FL_34291"
             },
             {
                 id: 1,
-                addr: "Lot 22 Eureka Ave",
+                addr: "Lot 22 Eureka Ave, North Pt, FL 34291",
                 price: "$25,000",
-                size: "0.23 Acres",
-                lat: 27.0698,
-                lng: -82.2262,
-                img: "https://images.unsplash.com/photo-1500076656116-558758c991c1?auto=format&fit=crop&w=800&q=80",
-                city: "North Port, FL 34291"
+                muni: "City of North Port",
+                sub: "1579- PORT CHARLOTTE SUB 14 REPLAT",
+                area: "929.03 m2 (10,000 Sq.Ft.)",
+                zoning: "SF2, Residencial, Single Family",
+                flood: "No necesita seguro de inundación",
+                lat: 27.0698, lng: -82.2262,
+                img: "Lot_22_Eureka_Ave_North_Pt_FL_34291"
             },
-             {
+            {
                 id: 2,
-                addr: "Langlais Dr #17, North Pt, FL 34286",
+                addr: "Afterglow #5, North Pt, FL 34286",
                 price: "$18,000",
-                size: "0.25 Acres",
-                lat: 27.0705,
-                lng: -82.2254,
-                img: "Langlais_Dr_17_North_Pt_FL_34286"
+                muni: "City of North Port",
+                sub: "1778- PORT CHARLOTTE SUB 46",
+                area: "929.03 m2 (10,000 Sq.Ft.)",
+                zoning: "SF2, Residencial, Single Family",
+                flood: "No necesita seguro de inundación",
+                lat: 27.047, lng: -82.220,
+                img: "Afterglow_5_North_Pt_FL_34286"
             },
             {
                 id: 3,
-                addr: "Afterglow #5",
+                addr: "Langlais Dr #17, North Pt, FL 34286",
                 price: "$18,000",
-                size: "0.45 Acres",
-                lat: 27.047,
-                lng: -82.220,
-                img: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80",
-                city: "North Port, FL 34286"
+                muni: "City of North Port",
+                sub: "1779- PORT CHARLOTTE SUB 47",
+                area: "911.75 m2 (9,814 Sq.Ft.)",
+                zoning: "SF2, Residencial, Single Family",
+                flood: "No necesita seguro de inundación",
+                lat: 27.039, lng: -82.227,
+                img: "Langlais_Dr_17_North_Pt_FL_34286"
+            },
+            {
+                id: 4,
+                addr: "Annatto St #8, North Pt, FL 34286",
+                price: "$18,000",
+                muni: "City of North Port",
+                sub: "1779- PORT CHARLOTTE SUB 47",
+                area: "929.03 m2 (10,000 Sq.Ft.)",
+                zoning: "SF2, Residencial, Single Family",
+                flood: "No necesita seguro de inundación",
+                lat: 27.037, lng: -82.224,
+                img: "Annatto_St_8_North_Pt_FL_34286"
+            },
+            {
+                id: 5,
+                addr: "LOTE # 9 LANCEWOOD ROAD, NORTH PORT SARASOTA FL",
+                price: "$18,000",
+                muni: "City of North Port",
+                sub: "1779- PORT CHARLOTTE SUB 47",
+                area: "(11,214 Sq.Ft.)",
+                zoning: "SF2, Residencial low",
+                flood: "No necesita seguro de inundación",
+                lat: 27.045, lng: -82.170,
+                img: "LOTE_9_LANCEWOOD_ROAD_NORTH_PORT_SARASOTA_FL"
+            },
+            {
+                id: 6,
+                addr: "309 HAMDEN ST PORT CHARLOTTE FL",
+                price: "$25,000",
+                muni: "City of North Port",
+                sub: "N/A",
+                area: "N/A",
+                zoning: "N/A",
+                flood: "N/A",
+                lat: 26.981, lng: -82.112,
+                img: "309_HAMDEN_ST_PORT_CHARLOTTE_FL"
+            },
+            {
+                id: 7,
+                addr: "218 AND 226 HAMDEN ST PORT CHARLOTTE FL (2 TERRENOS)",
+                price: "$60,000",
+                muni: "City of North Port",
+                sub: "N/A",
+                area: "N/A",
+                zoning: "N/A",
+                flood: "N/A",
+                lat: 26.982, lng: -82.115,
+                img: "AND_5_218_AND_226_HAMDEN_ST_PORT_CHARLOTTE_FL"
+            },
+            {
+                id: 8,
+                addr: "HARWOOD ST NORTH PORT SARASOTA FL 34288",
+                price: "$20,000",
+                muni: "City of North Port",
+                sub: "N/A",
+                area: "N/A",
+                zoning: "N/A",
+                flood: "N/A",
+                lat: 27.088, lng: -82.180,
+                img: "HARWOOD_ST_NORTH_PORT_SARASOTA_FL_34288"
             }
         ];
 
+        // Iruat ti mapa
         function initApp() {
-            // Inicializar mapa de Leaflet
-            map = L.map('map').setView([27.060, -82.225], 13);
+            map = L.map('map').setView([27.040, -82.180], 12);
 
-            // Capa satelital de Esri (Gratuita y profesional)
+            // Layer ti satelite manipud Esri
             L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, USDA, USGS'
             }).addTo(map);
 
             buildCards();
 
+            // Mangaramid kadagiti marka ti mapa
             properties.forEach((p, index) => {
-                // Crear marcador personalizado
                 const marker = L.circleMarker([p.lat, p.lng], {
                     radius: 10,
                     fillColor: "#22c55e",
@@ -160,7 +236,12 @@
                     fillOpacity: 0.9
                 }).addTo(map);
 
-                marker.bindPopup(`<div class="p-1"><b class="block text-slate-900">${p.addr}</b><span class="text-green-600 font-bold">${p.price}</span></div>`);
+                marker.bindPopup(`
+                    <div class="p-1">
+                        <b class="block text-slate-900">${p.addr}</b>
+                        <span class="text-green-600 font-bold">${p.price}</span>
+                    </div>
+                `);
                 
                 markers.push(marker);
 
@@ -170,26 +251,64 @@
             });
         }
 
+        // Mangaramid kadagiti kard ti impormasion
         function buildCards() {
             const grid = document.getElementById("grid");
             grid.innerHTML = "";
             properties.forEach((p, index) => {
                 const card = document.createElement("div");
-                card.className = "property-card group bg-white border border-slate-200 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl";
+                card.className = "property-card group bg-white border border-slate-200 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl flex flex-col";
                 card.id = "card-" + index;
 
+                // Para kadagiti awan ladawan na, agusar ti placeholder
+                const imgUrl = `https://via.placeholder.com/600x400?text=${p.img}`;
+
                 card.innerHTML = `
-                    <div class="relative h-56 overflow-hidden">
-                        <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onclick="event.stopPropagation(); openModal('${p.img}')">
-                        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold shadow-sm">Venta</div>
-                        <div class="absolute bottom-4 right-4 bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-bold shadow-lg">${p.price}</div>
+                    <div class="relative h-48 overflow-hidden bg-slate-200">
+                        <img src="${imgUrl}" 
+                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                             onerror="this.src='https://via.placeholder.com/600x400?text=Ladawan+ti+Lote'"
+                             onclick="event.stopPropagation(); openModal(this.src)">
+                        <div class="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded-md text-[10px] font-bold shadow-sm uppercase tracking-wider">Lako</div>
+                        <div class="absolute bottom-3 right-3 bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-bold shadow-lg">${p.price}</div>
                     </div>
-                    <div class="p-5">
-                        <h2 class="text-lg font-bold text-slate-900">${p.addr}</h2>
-                        <p class="text-slate-500 text-sm mb-4">${p.city}</p>
-                        <div class="flex items-center justify-between border-t border-slate-100 pt-4">
-                            <span class="text-sm font-semibold text-slate-700">${p.size}</span>
-                            <button class="text-green-600 font-bold text-sm">Ver en mapa</button>
+                    <div class="p-5 flex-grow">
+                        <h2 class="text-md font-bold text-slate-900 mb-1 leading-tight h-10 overflow-hidden">${p.addr}</h2>
+                        <p class="text-slate-400 text-xs mb-4 flex items-center gap-1">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                             </svg> ${p.muni}
+                        </p>
+                        
+                        <div class="space-y-2 mb-4">
+                            <div class="flex flex-col">
+                                <span class="detail-label">Subdibision</span>
+                                <span class="text-xs text-slate-700">${p.sub}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="flex flex-col">
+                                    <span class="detail-label">Kalawa</span>
+                                    <span class="text-xs text-slate-700 font-medium">${p.area}</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="detail-label">Zonipikasion</span>
+                                    <span class="text-xs text-slate-700 font-medium">${p.zoning}</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col pt-1">
+                                <span class="detail-label">Sona ti Layus</span>
+                                <span class="text-xs text-blue-600 font-medium">${p.flood}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between border-t border-slate-100 pt-4 mt-auto">
+                            <span class="text-[10px] text-slate-400 uppercase font-bold tracking-widest italic">ID: #${p.id + 100}</span>
+                            <button class="text-green-600 font-bold text-xs flex items-center gap-1 group-hover:underline">
+                                Kitaen iti mapa
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 `;
@@ -204,6 +323,7 @@
             });
         }
 
+        // I-highlight ti napili a kard
         function highlightCard(index) {
             document.querySelectorAll('.property-card').forEach(c => c.classList.remove('active-card'));
             const selectedCard = document.getElementById('card-' + index);
@@ -213,6 +333,7 @@
             }
         }
 
+        // Lukatan ti tawa ti ladawan
         function openModal(src) {
             const modal = document.getElementById("modal");
             const modalImg = document.getElementById("modalImg");
@@ -221,11 +342,11 @@
             modal.classList.add("flex");
         }
 
+        // Iserra ti tawa ti ladawan
         function closeModal() {
             document.getElementById("modal").classList.add("hidden");
         }
 
-        // Iniciar al cargar
         window.onload = initApp;
     </script>
 </body>
