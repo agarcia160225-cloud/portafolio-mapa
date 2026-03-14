@@ -1,257 +1,291 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inmobiliaria - Lotes en Venta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
 
-<title>Lotes en Venta</title>
+        .active-card {
+            border: 2px solid #22c55e !important;
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
 
-<style>
+        .custom-info-window {
+            padding: 8px;
+            font-family: 'Inter', sans-serif;
+        }
 
-body{
-font-family:Segoe UI,Arial;
-background:#eceff1;
-margin:0;
-padding:20px;
-}
-
-#map{
-height:450px;
-margin-bottom:40px;
-border-radius:10px;
-box-shadow:0 6px 20px rgba(0,0,0,0.2);
-}
-
-.property-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-gap:25px;
-max-width:1200px;
-margin:auto;
-}
-
-.property-card{
-background:white;
-border-radius:12px;
-overflow:hidden;
-box-shadow:0 4px 15px rgba(0,0,0,0.1);
-cursor:pointer;
-transition:.3s;
-}
-
-.property-card:hover{
-transform:translateY(-5px);
-box-shadow:0 10px 25px rgba(0,0,0,0.2);
-}
-
-.image-box{
-height:220px;
-overflow:hidden;
-}
-
-.image-box img{
-width:100%;
-height:100%;
-object-fit:cover;
-cursor:pointer;
-}
-
-.details{
-padding:18px;
-}
-
-.price{
-font-size:1.4rem;
-color:#27ae60;
-font-weight:bold;
-margin-bottom:10px;
-}
-
-.address{
-font-size:1rem;
-font-weight:600;
-}
-
-.modal{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.95);
-display:none;
-justify-content:center;
-align-items:center;
-z-index:9999;
-}
-
-.modal img{
-max-width:95%;
-max-height:95%;
-}
-
-.close{
-position:absolute;
-top:25px;
-right:40px;
-font-size:40px;
-color:white;
-cursor:pointer;
-}
-
-</style>
-
+        /* Ocultar scrollbar pero mantener funcionalidad */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
 </head>
+<body class="text-slate-800">
 
-<body>
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="bg-green-600 p-1.5 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
+                <span class="text-xl font-bold tracking-tight">GeoLotes <span class="text-green-600">Pro</span></span>
+            </div>
+            <nav class="hidden md:flex gap-6 text-sm font-medium text-slate-600">
+                <a href="#" class="hover:text-green-600 transition">Inicio</a>
+                <a href="#" class="hover:text-green-600 transition">Propiedades</a>
+                <a href="#" class="hover:text-green-600 transition">Contacto</a>
+            </nav>
+            <button class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-800 transition">
+                Publicar Lote
+            </button>
+        </div>
+    </header>
 
-<div id="map"></div>
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Map Section -->
+        <section class="mb-10">
+            <div class="flex items-end justify-between mb-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">Lotes Disponibles</h1>
+                    <p class="text-slate-500">Explora terrenos exclusivos en North Port, FL</p>
+                </div>
+                <div class="flex gap-2">
+                    <span class="flex items-center gap-1 text-sm font-medium bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        3 Disponibles
+                    </span>
+                </div>
+            </div>
+            <div id="map"></div>
+        </section>
 
-<div class="property-grid" id="grid"></div>
+        <!-- Properties Grid -->
+        <section>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="grid">
+                <!-- Cards injected via JS -->
+            </div>
+        </section>
+    </main>
 
-<div class="modal" id="modal">
-<span class="close" onclick="closeModal()">×</span>
-<img id="modalImg">
-</div>
+    <!-- Modal para Imágenes -->
+    <div id="modal" class="fixed inset-0 bg-slate-900/90 z-[100] hidden items-center justify-center p-4 backdrop-blur-sm transition-opacity duration-300" onclick="closeModal()">
+        <button class="absolute top-6 right-6 text-white hover:scale-110 transition" onclick="closeModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <img id="modalImg" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl transition-transform duration-300 scale-95" src="" alt="Vista previa">
+    </div>
 
-<script>
+    <script>
+        let map;
+        let markers = [];
+        const properties = [
+            {
+                id: 0,
+                addr: "Lot 4 Eureka Ave",
+                price: "$25,000",
+                size: "0.25 Acres",
+                lat: 27.0705,
+                lng: -82.2254,
+                img: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80",
+                city: "North Port, FL 34291"
+            },
+            {
+                id: 1,
+                addr: "Lot 22 Eureka Ave",
+                price: "$25,000",
+                size: "0.23 Acres",
+                lat: 27.0698,
+                lng: -82.2262,
+                img: "https://images.unsplash.com/photo-1500076656116-558758c991c1?auto=format&fit=crop&w=800&q=80",
+                city: "North Port, FL 34291"
+            },
+            {
+                id: 2,
+                addr: "Afterglow #5",
+                price: "$18,000",
+                size: "0.45 Acres",
+                lat: 27.047,
+                lng: -82.220,
+                img: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80",
+                city: "North Port, FL 34286"
+            }
+        ];
 
-let map;
+        function initMap() {
+            // Estilo personalizado para el mapa (opcional)
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 12,
+                center: { lat: 27.060, lng: -82.225 },
+                mapTypeId: "satellite",
+                tilt: 45,
+                mapTypeControlOptions: {
+                    position: google.maps.ControlPosition.BOTTOM_LEFT
+                }
+            });
 
-const properties=[
+            buildCards();
 
-{
-addr:"Lot 4 Eureka Ave",
-price:"$25,000",
-lat:27.0705,
-lng:-82.2254,
-img:"Lot_4_Eureka_Ave_North_Pt_FL_34291.jpg"
-},
+            properties.forEach((p, index) => {
+                const marker = new google.maps.Marker({
+                    position: { lat: p.lat, lng: p.lng },
+                    map: map,
+                    title: p.addr,
+                    animation: google.maps.Animation.DROP,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: "#22c55e",
+                        fillOpacity: 1,
+                        strokeWeight: 2,
+                        strokeColor: "#ffffff",
+                    }
+                });
 
-{
-addr:"Lot 22 Eureka Ave",
-price:"$25,000",
-lat:27.0698,
-lng:-82.2262,
-img:"Lot_22_Eureka_Ave_North_Pt_FL_34291.jpg"
-},
+                markers.push(marker);
 
-{
-addr:"Afterglow #5",
-price:"$18,000",
-lat:27.047,
-lng:-82.220,
-img:"Afterglow_5_North_Pt_FL_34286.jpg"
-}
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div class="custom-info-window">
+                            <h3 class="font-bold text-slate-900">${p.addr}</h3>
+                            <p class="text-green-600 font-bold">${p.price}</p>
+                            <p class="text-xs text-slate-500">${p.size}</p>
+                        </div>
+                    `
+                });
 
-];
+                marker.addListener("click", () => {
+                    // Cerrar otros infoWindows si existieran
+                    infoWindow.open(map, marker);
+                    highlightCard(index);
+                });
+            });
+        }
 
-function initMap(){
+        function buildCards() {
+            const grid = document.getElementById("grid");
+            properties.forEach((p, index) => {
+                const card = document.createElement("div");
+                card.className = "property-card group bg-white border border-slate-200 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl";
+                card.id = "card-" + index;
 
-map=new google.maps.Map(document.getElementById("map"),{
+                card.innerHTML = `
+                    <div class="relative h-56 overflow-hidden">
+                        <img src="${p.img}" 
+                             alt="${p.addr}"
+                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                             onclick="event.stopPropagation(); openModal('${p.img}')">
+                        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                            Venta
+                        </div>
+                        <div class="absolute bottom-4 right-4 bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-bold shadow-lg">
+                            ${p.price}
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-lg font-bold text-slate-900 leading-tight">${p.addr}</h2>
+                        </div>
+                        <p class="text-slate-500 text-sm mb-4 flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            </svg>
+                            ${p.city}
+                        </p>
+                        <div class="flex items-center justify-between border-t border-slate-100 pt-4">
+                            <div class="flex items-center gap-2">
+                                <div class="p-2 bg-slate-100 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                    </svg>
+                                </div>
+                                <span class="text-sm font-semibold text-slate-700">${p.size}</span>
+                            </div>
+                            <button class="text-green-600 font-bold text-sm hover:underline">Ver mapa</button>
+                        </div>
+                    </div>
+                `;
 
-zoom:11,
-center:{lat:27.044,lng:-82.235},
-mapTypeControl:true,
-mapTypeId:"satellite"
+                card.onclick = () => {
+                    map.setZoom(17);
+                    map.panTo({ lat: p.lat, lng: p.lng });
+                    highlightCard(index);
+                };
 
-});
+                grid.appendChild(card);
+            });
+        }
 
-buildCards();
+        function highlightCard(index) {
+            // Quitar clase activa de todas
+            document.querySelectorAll('.property-card').forEach(c => c.classList.remove('active-card'));
+            
+            // Añadir clase a la seleccionada
+            const selectedCard = document.getElementById('card-' + index);
+            selectedCard.classList.add('active-card');
+            
+            // Hacer scroll hasta la tarjeta
+            selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Animar el marcador
+            markers.forEach((m, i) => {
+                if(i === index) {
+                    m.setAnimation(google.maps.Animation.BOUNCE);
+                    setTimeout(() => m.setAnimation(null), 1500);
+                }
+            });
+        }
 
-properties.forEach((p,index)=>{
+        function openModal(src) {
+            const modal = document.getElementById("modal");
+            const modalImg = document.getElementById("modalImg");
+            modalImg.src = src;
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            setTimeout(() => {
+                modalImg.classList.remove("scale-95");
+                modalImg.classList.add("scale-100");
+            }, 10);
+        }
 
-const marker=new google.maps.Marker({
+        function closeModal() {
+            const modal = document.getElementById("modal");
+            const modalImg = document.getElementById("modalImg");
+            modalImg.classList.remove("scale-100");
+            modalImg.classList.add("scale-95");
+            setTimeout(() => {
+                modal.classList.remove("flex");
+                modal.classList.add("hidden");
+            }, 200);
+        }
+    </script>
 
-position:{lat:p.lat,lng:p.lng},
-map:map,
-title:p.addr
-
-});
-
-const info=new google.maps.InfoWindow({
-
-content:`<b>${p.addr}</b><br>${p.price}`
-
-});
-
-marker.addListener("click",()=>{
-
-info.open(map,marker);
-
-document.getElementById("card-"+index).scrollIntoView({behavior:"smooth"});
-
-});
-
-});
-
-}
-
-function buildCards(){
-
-const grid=document.getElementById("grid");
-
-properties.forEach((p,index)=>{
-
-const card=document.createElement("div");
-
-card.className="property-card";
-
-card.id="card-"+index;
-
-card.innerHTML=`
-
-<div class="image-box">
-
-<img src="${p.img}" onclick="openModal('${p.img}')" onerror="this.src='https://via.placeholder.com/600x400?text=Imagen+no+disponible'">
-
-</div>
-
-<div class="details">
-
-<div class="price">${p.price}</div>
-
-<div class="address">${p.addr}</div>
-
-</div>
-
-`;
-
-card.onclick=()=>{
-
-map.setZoom(16);
-
-map.panTo({lat:p.lat,lng:p.lng});
-
-};
-
-grid.appendChild(card);
-
-});
-
-}
-
-function openModal(src){
-
-document.getElementById("modalImg").src=src;
-
-document.getElementById("modal").style.display="flex";
-
-}
-
-function closeModal(){
-
-document.getElementById("modal").style.display="none";
-
-}
-
-</script>
-
-<script async defer
-src="https://maps.googleapis.com/maps/api/js?key=TU_API_KEY&callback=initMap">
-</script>
+    <!-- RECUERDA: Debes reemplazar TU_API_KEY con tu clave real de Google Maps -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap">
+    </script>
 
 </body>
 </html>
